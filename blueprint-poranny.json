@@ -17,7 +17,7 @@
       "type": "telegram.sendMessage",
       "connection": "Telegram AudeBot",
       "settings": {
-        "chat_id": "YOUR_CHAT_ID",
+        "chat_id": "https://hook.eu2.make.com/41xxwfql0a169nhbzfmcgqvroe9u33os",
         "text": "Ten dzień jest Twój.\nRealizacja celu na dziś to:\n• 13 pierwszych kontaktów;\n• 3 umówione terminy\n• UMSATZ! € € €\n\nPamiętaj!\n\nU M $ A T Z   m a c h t   f r € i ! ! !"
       }
     }
