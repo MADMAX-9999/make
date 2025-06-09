@@ -1,0 +1,48 @@
+{
+  "scenarios": [
+    {
+      "name": "Wieczór – raport i analiza",
+      "modules": [
+        { "type": "telegram.bot.watchUpdates", "name": "Watch Updates", "settings": { "bot": "Aude_Bot" } },
+        { "type": "router", "name": "Router", "connections": [["Watch Updates","filter_report"]] },
+        { "type": "filter", "name": "filter_report", "settings": {"variable":"message.text","condition": "starts with","value":"/report"} },
+        { "type": "textParser.split", "name": "Split report", "settings": {"text":"{{replace(message.text; "/report ";"")}}","separator":","} },
+        { "type": "textParser.match", "name": "kontakty", "settings": {"text":"{{split[0]}}","pattern":"\d+"} },
+        { "type": "textParser.match", "name": "spotkania", "settings": {"text":"{{split[1]}}","pattern":"\d+"} },
+        { "type": "textParser.match", "name": "obrot", "settings": {"text":"{{split[2]}}","pattern":"\d+"} },
+        { "type": "textParser.match", "name": "zysk", "settings": {"text":"{{split[3]}}","pattern":"\d+"} },
+        { "type": "openai.createCompletion", "name": "OpenAI – analiza", "settings": {
+            "model":"gpt-4",
+            "prompt":"Na podstawie:\n– Cel: 20 mln EUR do 20.02.2037\n– Tygodniowe cele: min. 30 kontaktów, 10 spotkań, 5 000 EUR obrotu, 2 000 EUR zysku\n– Dziennych danych: kontakty: {{kontakty.match[0]}}, spotkania: {{spotkania.match[0]}}, obrót: {{obrot.match[0]}}, zysk: {{zysk.match[0]}}\n\nWygeneruj odpowiedź stylem:\n„Dziękuję za podsumowanie. Widzę, że… Na jutro proponuję: 1.… 2.… 3.… Trzymaj tak dalej!”\n",
+            "temperature":0.7
+        }},
+        { "type": "telegram.bot.sendMessage", "name": "Send analysis", "settings": {"chatId":"{{message.chat.id}}","text":"{{openai.createCompletion.choices[0].text}}","bot":"Aude_Bot"} },
+        { "type": "google.sheets.addRow", "name": "Save to Sheets", "settings": {
+            "sheetId":"YOUR_SHEET_ID",
+            "sheetName":"raporty",
+            "values":[
+              "{{formatDate(now;"YYYY-MM-DD")}}",
+              "{{kontakty.match[0]}}",
+              "{{spotkania.match[0]}}",
+              "{{obrot.match[0]}}",
+              "{{zysk.match[0]}}",
+              "{{openai.createCompletion.choices[0].text}}"
+            ]
+        } }
+      ]
+    },
+    {
+      "name": "Poranek – plan dnia",
+      "modules": [
+        { "type": "tools.schedule", "name": "Every day 07:00", "settings": {"schedule": "0 7 * * *"} },
+        { "type": "google.sheets.getRows", "name": "Get last report", "settings": {"sheetId":"YOUR_SHEET_ID","sheetName":"raporty","limit":1,"orderBy":"desc","orderByColumn":"A"} },
+        { "type": "openai.createCompletion", "name": "OpenAI – plan", "settings": {
+            "model":"gpt-4",
+            "prompt":"Na podstawie ostatniego raportu:\n– Cel: 20 mln EUR do 20.02.2037\n– Tygodniowe cele: min. 30 kontaktów, 10 spotkań, 5 000 EUR obrotu, 2 000 EUR zysku\n– Dzienne dane: kontakty: {{getRows.values[0][1]}}, spotkania: {{getRows.values[0][2]}}, obrót: {{getRows.values[0][3]}}, zysk: {{getRows.values[0][4]}}\n\nWygeneruj plan dnia w formie:\n„Dzień dobry! Oto Twój plan na dziś: 1.… 2.… 3.… Powodzenia!”\n",
+            "temperature":0.7
+        }},
+        { "type": "telegram.bot.sendMessage", "name": "Send plan", "settings": {"chatId":"YOUR_CHAT_ID","text":"{{openai.createCompletion.choices[0].text}}","bot":"Aude_Bot"} }
+      ]
+    }
+  ]
+}
