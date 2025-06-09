@@ -1,0 +1,37 @@
+{
+  "modules": [
+    {
+      "id": 1,
+      "name": "Scheduler",
+      "type": "scheduler",
+      "settings": {
+        "trigger": {
+          "mode": "every_day",
+          "time": "07:15"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "Send Telegram message",
+      "type": "telegram.sendMessage",
+      "connection": "Telegram AudeBot",
+      "settings": {
+        "chat_id": "YOUR_CHAT_ID",
+        "text": "Ten dzień jest Twój.\nRealizacja celu na dziś to:\n• 13 pierwszych kontaktów;\n• 3 umówione terminy\n• UMSATZ! € € €\n\nPamiętaj!\n\nU M $ A T Z   m a c h t   f r € i ! ! !"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "Telegram AudeBot",
+      "moduleId": 2,
+      "type": "telegram",
+      "settings": {
+        "bot_token": "8154650290:AAGtJ9NfvZZ90O3GrslTBJLCoCpqTbhAfXY"
+      }
+    }
+  ],
+  "connectionsOrder": ["Telegram AudeBot"],
+  "modulesOrder": [1, 2]
+}
